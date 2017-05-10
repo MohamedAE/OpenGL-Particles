@@ -7,7 +7,8 @@
 	Purpose:    Design, code, and test a simple implementation of linked lists.
 				Use multiple files in a program.
 				Use of a Makefile.
-	Notes:		"Fountain of Colours"
+	Notes:		"Warp speed"
+				A simulation of flying through space, stars whizzing by.
 */
 
 /* -----------------------------------------------------------------------------
@@ -27,28 +28,37 @@
 ------------------------------------------------------------------------------*/
 int particle_init(struct particle *p) {
 	/* Initialize colour (white) */
-	p->col.r = (rand() % 10) * .1;
-	p->col.g = (rand() % 10) * .1;
-	p->col.b = (rand() % 10) * .1;
+	p->col.r = p->col.g = p->col.b = 1.0;
+
+	/* Initialize aplha with a low value */
 	p->col.a = 0.01;
 
-	/* Initialize position to 0,-300 */
-	p->pos.x = 0.0;
-	p->pos.y = -300.0;
+
+	/* Initialize position to 0,0 */
+	p->pos.x = p->pos.y = p->pos.z = 0.0;
 
 	/* Initialize random direction vector; x */
-	p->dir.x = random_number(-5, 5);
+	p->dir.x = random_number(-10, 10);
+
+	/* Generate a new value if initial value is too low */
+	while (p->dir.x > -1 && p->dir.x < 1) {
+		p->dir.x = random_number(-10, 10);
+	}
 
 	/* Initialize random direction vector; y */
-	p->dir.y = random_number(100, 500) * 0.01;
+	p->dir.y = random_number(-10, 10);
+
+	/* Generate a new value if initial value is too low */
+	while (p->dir.y > -1 && p->dir.y < 1) {
+		p->dir.y = random_number(-10, 10);
+	}
 
 	/* Initialize speed vector */
-	p->spd.x = 0.2;
-	p->spd.y = 2.0;
+	p->spd.x = p->spd.y = 0.01;
 
 	/* Initialize lifespan and size */
 	p->lifespan = 100;
-	p->size = 5;
+	p->size = 0.1;
 
 	return 0;
 }
@@ -136,7 +146,6 @@ int particle_update(struct particle **head) {
 	if (curr == NULL) return -1;
 
 	while (curr != NULL) {
-		/* Increment alpha by a small value */
 		curr->col.a += 0.01;
 
 		/* Update x position */
@@ -155,8 +164,16 @@ int particle_update(struct particle **head) {
 			particle_init(curr);
 		}
 
-		/* Decrement vertical direction slightly, simulating gravity */
-		curr->dir.y -= 0.005;
+		/* Update speed */
+		curr->spd.x += 0.01;
+		curr->spd.y += 0.01;
+
+		/* Increase size */
+		curr->size += 0.05;
+
+		/*	Particles are recycled when they reach the boundary, making lifespan
+			arbitrary (no need to check if lifespan is 0).
+		*/
 
 		curr = curr->next;
 	}
